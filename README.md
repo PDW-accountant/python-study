@@ -90,6 +90,30 @@
 * 예시: `if (n := len(a)) > 10:` ➝ 리스트 `a`의 길이를 구해서 변수 `n`에 저장하고, 곧바로 그 `n`이 10보다 큰지 `if`문으로 검사합니다.
 * 불필요한 변수 선언 줄을 줄여주어 코드를 훨씬 압축적이고 간결하게 만들어 줍니다.
 
+
+### 5.4 `global` 키워드와 변수 스코프
+* 함수 밖에서 선언된 모듈 레벨 변수는 함수 안에서 **읽기만** 할 때는 `global` 선언 없이도 그대로 가져다 쓸 수 있습니다.
+* 그러나 함수 안에서 해당 변수에 **재할당(`=`)**을 하려면 반드시 `global 변수명`을 먼저 선언해야 합니다.
+* **이유:** Python은 함수 전체를 파싱할 때 할당(`=`)이 있는 변수를 **지역 변수**로 취급합니다. 할당 이전에 읽기를 시도하면 `UnboundLocalError`가 발생합니다.
+
+```python
+_pool = None  # 모듈 레벨 변수
+
+# ❌ global 없이 재할당 시도
+def get_pool_wrong():
+    if _pool is None:           # 읽기 시도
+        _pool = create_pool()   # 할당 → Python이 _pool을 지역 변수로 취급
+    return _pool                # UnboundLocalError: local variable '_pool' referenced before assignment
+
+# ✅ global 선언 후 재할당
+def get_pool_correct():
+    global _pool                # "모듈 레벨 _pool을 사용하겠다"
+    if _pool is None:           # 모듈 레벨 _pool 읽기
+        _pool = create_pool()   # 모듈 레벨 _pool에 쓰기
+    return _pool
+```
+
+* **요약:** 외부 변수를 **읽기만** 하면 `global` 불필요, **값을 바꾸려면** `global` 필수.
 ## 6. 파일 입출력 (File I/O)
 
 ### 6.1 PDF 및 미디어 파일의 바이너리 모드 사용 이유
